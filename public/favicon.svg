@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <!-- Glow Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <!-- Gradients -->
+    <linearGradient id="gradient-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="50%" stop-color="#4facfe" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+    <linearGradient id="gradient-dot" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff007f" />
+      <stop offset="100%" stop-color="#7f00ff" />
+    </linearGradient>
+  </defs>
+
+  <!-- Dark circular backdrop for contrast on light/dark themes -->
+  <circle cx="256" cy="256" r="236" fill="#0b0f19" stroke="#1e293b" stroke-width="12" />
+
+  <!-- A stylized neon gesture trail/path -->
+  <path d="M120 340 C 140 180, 260 120, 360 180 C 440 230, 420 340, 320 360 C 240 380, 160 300, 200 240 C 220 210, 260 190, 300 200" 
+        stroke="url(#gradient-stroke)" 
+        stroke-width="36" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        filter="url(#glow)" />
+
+  <!-- Drawing hand tip / cursor dot -->
+  <circle cx="300" cy="200" r="28" fill="#ffffff" filter="url(#glow)" />
+  <circle cx="300" cy="200" r="14" fill="url(#gradient-dot)" />
+</svg>
