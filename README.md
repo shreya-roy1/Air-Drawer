@@ -52,4 +52,4 @@ Step into the future of digital creation. Air Draw is a high-performance web app
 3.  **Initialize**: Grant camera permissions in your browser, step back, and raise your hands into the frame.
 
 ---
-*Forged with a passion for AI and the future of Spatial Computing.*
+*Built with a passion for AI and Spatial Computing.*
