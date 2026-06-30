@@ -222,7 +222,7 @@ function App() {
 
       {!landmark && !controlLandmark && (
         <div className="overlay-message">
-          👋 Raise your hand to start drawing
+          <span className="pulse-emoji">👋</span> Raise your hand to start drawing
         </div>
       )}
     </div>

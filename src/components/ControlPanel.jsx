@@ -17,11 +17,11 @@ import {
 
 
 const COLORS = [
-  '#00ffff', // Neon Cyan
-  '#ff00ff', // Neon Pink
-  '#ffff00', // Neon Yellow
-  '#00ff00', // Neon Green
-  '#ff0000', // Neon Red
+  '#06b6d4', // Sophisticated Cyan
+  '#f43f5e', // Sophisticated Rose/Pink
+  '#f59e0b', // Sophisticated Amber/Yellow
+  '#10b981', // Sophisticated Emerald/Green
+  '#6366f1', // Sophisticated Indigo/Blue
   '#ffffff', // Pure White
 ];
 
@@ -165,6 +165,7 @@ const ControlPanel = ({
           alignItems: 'center',
           cursor: 'pointer',
           color: isLightBg ? '#000' : '#fff',
+          border: 'none',
         }}
       >
         <Settings size={22} />
@@ -185,7 +186,8 @@ const ControlPanel = ({
               display: 'flex',
               flexDirection: 'column',
               gap: '24px',
-              marginTop: '12px'
+              marginTop: '12px',
+              border: 'none',
             }}
           >
             {/* Color Palette */}
@@ -194,28 +196,30 @@ const ControlPanel = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                marginBottom: '12px',
+                marginBottom: '16px',
                 fontSize: '14px',
                 fontWeight: 600,
                 color: isLightBg ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)'
               }}>
                 <Palette size={16} /> Color Palette
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', padding: '0 4px' }}>
                 {COLORS.map((c) => (
                   <motion.div
                     key={c}
-                    whileHover={{ scale: 1.2 }}
+                    whileHover={{ scale: 1.25 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => onSettingsChange({ color: c, isEraser: false })}
                     style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '8px',
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
                       backgroundColor: c,
                       cursor: 'pointer',
-                      border: settings.color === c ? (isLightBg ? '2px solid #000' : '2px solid #fff') : 'none',
-                      boxShadow: settings.color === c ? `0 0 15px ${c}` : 'none',
+                      boxShadow: settings.color === c ? `0 0 10px ${c}` : 'none',
+                      border: 'none',
+                      scale: settings.color === c ? 1.2 : 1,
+                      transition: 'scale 0.2s',
                     }}
                   />
                 ))}
@@ -253,63 +257,69 @@ const ControlPanel = ({
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <ActionButton icon={<Undo2 size={18} />} label="Undo" onClick={onUndo} isLightBg={isLightBg} />
-              <ActionButton icon={<Redo2 size={18} />} label="Redo" onClick={onRedo} isLightBg={isLightBg} />
-              <ActionButton icon={<Trash2 size={18} />} label="Clear" onClick={onClear} isLightBg={isLightBg} />
-              <ActionButton icon={<Download size={18} />} label="Save" onClick={onSave} isLightBg={isLightBg} />
-              <ActionButton
-                icon={cameraVisible ? <EyeOff size={18} /> : <Eye size={18} />}
-                label={cameraVisible ? "Hide Cam" : "Show Cam"}
-                onClick={onToggleCamera}
-                isLightBg={isLightBg}
-              />
-              <ActionButton
-                icon={<Zap size={18} />}
-                label={gestureVisible ? "Gestures On" : "Gestures Off"}
-                onClick={onToggleGestures}
-                active={gestureVisible}
-                isLightBg={isLightBg}
-              />
-              <ActionButton
-                icon={<HelpCircle size={18} />}
-                label="Help"
-                onClick={onHelp}
-                isLightBg={isLightBg}
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {/* Row 1: Core Canvas Actions */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                <ActionButton icon={<Undo2 size={18} />} onClick={onUndo} isLightBg={isLightBg} title="Undo" />
+                <ActionButton icon={<Redo2 size={18} />} onClick={onRedo} isLightBg={isLightBg} title="Redo" />
+                <ActionButton icon={<Trash2 size={18} />} onClick={onClear} isLightBg={isLightBg} title="Clear All" />
+                <ActionButton icon={<Download size={18} />} onClick={onSave} isLightBg={isLightBg} title="Save Image" />
+              </div>
+
+              {/* Row 2: Status Toggles & Help */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                <ActionButton
+                  icon={cameraVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                  onClick={onToggleCamera}
+                  isLightBg={isLightBg}
+                  title={cameraVisible ? "Hide Camera" : "Show Camera"}
+                />
+                <ActionButton
+                  icon={<Zap size={18} />}
+                  onClick={onToggleGestures}
+                  active={gestureVisible}
+                  isLightBg={isLightBg}
+                  title={gestureVisible ? "Gestures Enabled" : "Gestures Disabled"}
+                />
+                <ActionButton
+                  icon={<HelpCircle size={18} />}
+                  onClick={onHelp}
+                  isLightBg={isLightBg}
+                  title="Gesture Help Guide"
+                />
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-
     </div>
   );
 };
 
-const ActionButton = ({ icon, label, onClick, active = false, isLightBg = false }) => (
+const ActionButton = ({ icon, onClick, active = false, isLightBg = false, title }) => (
   <motion.button
     className="glass-meta"
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
     onClick={onClick}
+    title={title}
     style={{
-      borderRadius: '12px',
-      padding: '10px',
+      borderRadius: '10px',
+      height: '38px',
       color: isLightBg ? '#000' : '#fff',
       display: 'flex',
-      flexDirection: 'column',
+      justifyContent: 'center',
       alignItems: 'center',
-      gap: '4px',
       cursor: 'pointer',
-      fontSize: '10px',
-      transition: 'all 0.2s',
-      boxShadow: active ? (isLightBg ? '0 0 10px rgba(0, 0, 0, 0.25)' : '0 0 10px rgba(255, 255, 255, 0.5)') : 'none',
-      border: active ? (isLightBg ? '1px solid rgba(0, 0, 0, 0.3)' : '1px solid rgba(255, 255, 255, 0.4)') : undefined
+      transition: 'background-color 0.2s, box-shadow 0.2s',
+      border: 'none',
+      background: active
+        ? (isLightBg ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)')
+        : undefined,
+      boxShadow: 'none',
     }}
   >
     {icon}
-    {label}
   </motion.button>
 );
 

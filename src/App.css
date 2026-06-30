@@ -29,13 +29,41 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 24px;
-  font-weight: 300;
-  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
   text-align: center;
   pointer-events: none;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-emoji {
+  display: inline-block;
+  margin-right: 12px;
+  animation: wave-pulse 2.2s infinite ease-in-out;
+  transform-origin: 70% 70%;
+}
+
+@keyframes wave-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  20% {
+    transform: scale(1.25) rotate(-15deg);
+  }
+  40% {
+    transform: scale(1.15) rotate(10deg);
+  }
+  60% {
+    transform: scale(1.25) rotate(-10deg);
+  }
+  80% {
+    transform: scale(1.15) rotate(5deg);
+  }
 }
 
 /* Custom range slider styling */
@@ -82,10 +110,9 @@ input[type='range']::-webkit-slider-thumb:hover {
 }
 
 .light-theme .glass-meta {
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.02) 100%);
-  border-top: 1px solid rgba(0, 0, 0, 0.15);
-  border-left: 1px solid rgba(0, 0, 0, 0.15);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  border-right: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+  border: none;
 }

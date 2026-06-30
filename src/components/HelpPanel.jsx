@@ -30,6 +30,19 @@ const gestures = [
 ];
 
 export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
+  const displayedGestures = isWelcome
+    ? [
+        {
+          section: 'Drawing Basics',
+          items: [
+            { emoji: '☝️', gesture: 'Index finger up', action: 'Draw lines in the air' },
+            { emoji: '🤏', gesture: 'Pinch (thumb + index)', action: 'Hold to erase lines' },
+            { emoji: '✊', gesture: 'Fist shape', action: 'Clear the entire canvas' },
+          ],
+        },
+      ]
+    : gestures;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -60,13 +73,13 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
               width: '100%',
               height: '100%',
               overflowY: 'auto',
-              padding: '60px 24px',
+              padding: '80px 24px',
               color: '#fff',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               boxSizing: 'border-box',
-              background: 'radial-gradient(circle at center, #1b153a 0%, #07040d 100%)',
+              background: 'radial-gradient(circle at center, #111827 0%, #030712 100%)',
             } : {
               width: '380px',
               maxHeight: '80vh',
@@ -76,7 +89,7 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
               color: '#fff',
             }}
           >
-            <div style={{ maxWidth: isWelcome ? '960px' : '500px', width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ maxWidth: isWelcome ? '460px' : '500px', width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Header */}
               <div style={{ 
                 display: 'flex', 
@@ -97,19 +110,17 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
                     <HelpCircle size={20} style={{ color: '#00ffff' }} />
                   )}
                   <span style={{ 
-                    fontSize: isWelcome ? '32px' : '16px', 
+                    fontSize: isWelcome ? '28px' : '16px', 
                     fontWeight: 800, 
                     letterSpacing: '0.05em',
-                    background: isWelcome ? 'linear-gradient(135deg, #00ffff 0%, #ff00ff 100%)' : 'none',
-                    WebkitBackgroundClip: isWelcome ? 'text' : 'none',
-                    WebkitTextFillColor: isWelcome ? 'transparent' : 'inherit',
+                    color: '#fff',
                   }}>
                     {isWelcome ? 'Welcome to AirDrawer' : 'Gesture Guide'}
                   </span>
                 </div>
                 {isWelcome && (
                   <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginTop: '12px', fontWeight: 300, lineHeight: '1.6' }}>
-                    Experience drawing in 3D space using intuitive hand gestures right in front of your webcam.
+                    Draw in 3D space using simple hand gestures right in front of your camera.
                   </p>
                 )}
                 {!isWelcome && (
@@ -132,16 +143,14 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
               {/* Privacy / Camera Alert Callout */}
               {isWelcome && (
                 <div style={{
-                  backgroundColor: 'rgba(0, 255, 255, 0.04)',
-                  border: '1px solid rgba(0, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(0, 255, 255, 0.03)',
+                  border: '1px solid rgba(0, 255, 255, 0.15)',
                   borderRadius: '16px',
                   padding: '16px',
-                  fontSize: '12.5px',
+                  fontSize: '12px',
                   lineHeight: '1.6',
                   color: '#e2e8f0',
-                  maxWidth: '700px',
                   width: '100%',
-                  alignSelf: 'center',
                   boxSizing: 'border-box',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#00ffff', marginBottom: '8px', fontSize: '13px' }}>
@@ -153,26 +162,22 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
                 </div>
               )}
 
-              {/* Gesture Sections in Row/Grid */}
-              <div style={isWelcome ? {
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '20px',
-                width: '100%',
-              } : {
+              {/* Gesture Sections */}
+              <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
+                gap: '16px',
+                width: '100%',
               }}>
-                {gestures.map((section, sIdx) => (
+                {displayedGestures.map((section, sIdx) => (
                   <div key={sIdx} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{
                       fontSize: '11px',
-                      fontWeight: 700,
-                      color: 'rgba(255, 255, 255, 0.4)',
+                      fontWeight: 800,
+                      color: 'rgba(255, 255, 255, 0.75)',
                       textTransform: 'uppercase',
-                      letterSpacing: '0.12em',
-                      marginBottom: '4px',
+                      letterSpacing: '0.1em',
+                      marginBottom: '2px',
                     }}>
                       {section.section}
                     </div>
@@ -187,7 +192,7 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
                             padding: '10px 14px',
                             borderRadius: '12px',
                             backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.03)',
+                            border: '1px solid rgba(255, 255, 255, 0.02)',
                           }}
                         >
                           <span style={{ fontSize: '22px', width: '32px', textAlign: 'center' }}>{item.emoji}</span>
@@ -206,22 +211,22 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
               {isWelcome && (
                 <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                   <motion.button
-                    whileHover={{ scale: 1.02, boxShadow: '0 0 25px rgba(0, 255, 255, 0.6)' }}
+                    whileHover={{ scale: 1.02, backgroundColor: '#00f0ff' }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onClose}
                     style={{
                       width: '100%',
-                      maxWidth: '360px',
                       padding: '14px 20px',
                       borderRadius: '14px',
                       border: 'none',
-                      background: 'linear-gradient(135deg, #00ffff 0%, #ff00ff 100%)',
+                      background: '#00ffff',
                       color: '#000',
                       fontWeight: 800,
-                      fontSize: '14.5px',
+                      fontSize: '14px',
                       cursor: 'pointer',
-                      boxShadow: '0 0 15px rgba(0, 255, 255, 0.3)',
-                      transition: 'box-shadow 0.2s',
+                      marginTop: '10px',
+                      boxShadow: '0 4px 14px rgba(0, 255, 255, 0.2)',
+                      transition: 'background-color 0.2s, transform 0.1s',
                     }}
                   >
                     Understood & Start Drawing
