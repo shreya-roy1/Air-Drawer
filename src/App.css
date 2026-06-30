@@ -66,3 +66,26 @@ input[type='range']::-webkit-slider-thumb:hover {
   transform: scale(1.2);
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
 }
+
+/* Light theme overrides for range sliders and glassmorphism */
+.light-theme input[type='range'] {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.light-theme input[type='range']::-webkit-slider-thumb {
+  background: #1e293b;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.light-theme input[type='range']::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+}
+
+.light-theme .glass-meta {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.02) 100%);
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  border-left: 1px solid rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+}
