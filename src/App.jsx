@@ -30,6 +30,7 @@ function App() {
   const [cameraVisible, setCameraVisible] = useState(true);
   const [gesturesEnabled, setGesturesEnabled] = useState(true);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [hasAcceptedOnboarding, setHasAcceptedOnboarding] = useState(false);
 
   const canvasRef = useRef(null);
   const interpreter = useMemo(() => new GestureInterpreter(), []);
@@ -77,7 +78,7 @@ function App() {
 
   return (
     <div className="app-container">
-      {cameraVisible && (
+      {hasAcceptedOnboarding && cameraVisible && (
         <CameraView
           onResults={onResults}
         />
@@ -108,7 +109,8 @@ function App() {
         onHelp={() => setIsHelpOpen(true)}
       />
 
-      <HelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      <HelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} isWelcome={false} />
+      <HelpPanel isOpen={!hasAcceptedOnboarding} onClose={() => setHasAcceptedOnboarding(true)} isWelcome={true} />
 
       {/* Floating Gesture Status */}
       <AnimatePresence>
