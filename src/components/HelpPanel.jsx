@@ -72,12 +72,13 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
             style={isWelcome ? {
               width: '100%',
               height: '100%',
-              overflowY: 'auto',
-              padding: '80px 24px',
+              overflowY: 'hidden',
+              padding: '40px 24px',
               color: '#fff',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'center',
               boxSizing: 'border-box',
               background: 'radial-gradient(circle at center, #111827 0%, #030712 100%)',
             } : {
@@ -91,39 +92,40 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
           >
             <div style={{ maxWidth: isWelcome ? '460px' : '500px', width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Header */}
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column',
-                alignItems: isWelcome ? 'center' : 'stretch', 
-                marginBottom: '10px',
-                textAlign: isWelcome ? 'center' : 'left'
-              }}>
+              {isWelcome ? (
                 <div style={{ 
                   display: 'flex', 
-                  flexDirection: isWelcome ? 'column' : 'row', 
+                  flexDirection: 'column',
                   alignItems: 'center', 
-                  gap: isWelcome ? '16px' : '8px' 
+                  marginBottom: '10px',
+                  textAlign: 'center'
                 }}>
-                  {isWelcome ? (
-                    <Sparkles size={48} style={{ color: '#00ffff' }} />
-                  ) : (
-                    <HelpCircle size={20} style={{ color: '#00ffff' }} />
-                  )}
+                  <Sparkles size={48} style={{ color: '#00ffff', marginBottom: '16px' }} />
                   <span style={{ 
-                    fontSize: isWelcome ? '28px' : '16px', 
+                    fontSize: '28px', 
                     fontWeight: 800, 
                     letterSpacing: '0.05em',
                     color: '#fff',
                   }}>
-                    {isWelcome ? 'Welcome to AirDrawer' : 'Gesture Guide'}
+                    Welcome to AirDrawer
                   </span>
-                </div>
-                {isWelcome && (
                   <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginTop: '12px', fontWeight: 300, lineHeight: '1.6' }}>
                     Draw in 3D space using simple hand gestures right in front of your camera.
                   </p>
-                )}
-                {!isWelcome && (
+                </div>
+              ) : (
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  marginBottom: '20px' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <HelpCircle size={20} style={{ color: '#00ffff' }} />
+                    <span style={{ fontSize: '16px', fontWeight: 800, letterSpacing: '0.05em', color: '#fff' }}>
+                      Gesture Guide
+                    </span>
+                  </div>
                   <button
                     onClick={onClose}
                     style={{
@@ -137,8 +139,8 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
                   >
                     <X size={18} />
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Privacy / Camera Alert Callout */}
               {isWelcome && (
