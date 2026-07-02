@@ -11,7 +11,8 @@ import {
   EyeOff,
   Zap,
   MousePointer2,
-  HelpCircle
+  HelpCircle,
+  Box
 } from 'lucide-react';
 
 
@@ -32,6 +33,7 @@ const ControlPanel = ({
   onUndo,
   onRedo,
   onSave,
+  onExportOBJ,
   onToggleCamera,
   cameraVisible,
   gestureVisible,
@@ -165,7 +167,6 @@ const ControlPanel = ({
           alignItems: 'center',
           cursor: 'pointer',
           color: isLightBg ? '#000' : '#fff',
-          border: 'none',
         }}
       >
         <Settings size={22} />
@@ -187,7 +188,6 @@ const ControlPanel = ({
               flexDirection: 'column',
               gap: '24px',
               marginTop: '12px',
-              border: 'none',
             }}
           >
             {/* Color Palette */}
@@ -238,7 +238,11 @@ const ControlPanel = ({
                   max="50"
                   value={settings.lineWidth}
                   onChange={(e) => onSettingsChange({ lineWidth: parseInt(e.target.value) })}
-                  style={{ width: '100%', accentColor: settings.color }}
+                  style={{
+                    width: '100%',
+                    accentColor: settings.color,
+                    '--thumb-color': settings.color
+                  }}
                 />
               </div>
               <div>
@@ -251,22 +255,47 @@ const ControlPanel = ({
                   max="50"
                   value={settings.glowIntensity}
                   onChange={(e) => onSettingsChange({ glowIntensity: parseInt(e.target.value) })}
-                  style={{ width: '100%', accentColor: settings.color }}
+                  style={{
+                    width: '100%',
+                    accentColor: settings.color,
+                    '--thumb-color': settings.color
+                  }}
                 />
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {/* Row 1: Core Canvas Actions */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)', marginBottom: '-6px' }}>
+                Canvas Controls
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                 <ActionButton icon={<Undo2 size={18} />} onClick={onUndo} isLightBg={isLightBg} title="Undo" />
                 <ActionButton icon={<Redo2 size={18} />} onClick={onRedo} isLightBg={isLightBg} title="Redo" />
                 <ActionButton icon={<Trash2 size={18} />} onClick={onClear} isLightBg={isLightBg} title="Clear All" />
-                <ActionButton icon={<Download size={18} />} onClick={onSave} isLightBg={isLightBg} title="Save Image" />
               </div>
 
-              {/* Row 2: Status Toggles & Help */}
+              <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)', marginBottom: '-6px', marginTop: '4px' }}>
+                Export
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <ActionButton 
+                  icon={<div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600 }}><Download size={14} /> PNG</div>} 
+                  onClick={onSave} 
+                  isLightBg={isLightBg} 
+                  title="Save Flat PNG Image" 
+                />
+                <ActionButton 
+                  icon={<div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600 }}><Box size={14} /> 3D OBJ</div>} 
+                  onClick={onExportOBJ} 
+                  isLightBg={isLightBg} 
+                  title="Export 3D Spatial Model" 
+                />
+              </div>
+
+              <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.4)', marginBottom: '-6px', marginTop: '4px' }}>
+                System
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                 <ActionButton
                   icon={cameraVisible ? <EyeOff size={18} /> : <Eye size={18} />}
