@@ -151,7 +151,8 @@ export class GestureInterpreter {
     const isFingerUp = (fingerIndex) => {
       const tip = landmarks[fingerIndex * 4 + 4];
       const pip = landmarks[fingerIndex * 4 + 2];
-      return tip.y < pip.y;
+      // Rotation-invariant check: distance from wrist to tip vs wrist to PIP
+      return getDistance(wrist, tip) > getDistance(wrist, pip);
     };
 
     const indexUp = isFingerUp(1);

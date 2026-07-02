@@ -28,9 +28,11 @@ export class GestureController {
     const isFingerUp = (fingerIndex) => {
       // Finger indices: 0:Thumb, 1:Index, 2:Middle, 3:Ring, 4:Pinky
       // Landmarks: Thumb(4), Index(8), Middle(12), Ring(16), Pinky(20)
+      const wrist = landmarks[0];
       const tip = landmarks[fingerIndex * 4 + 4];
       const pip = landmarks[fingerIndex * 4 + 2];
-      return tip.y < pip.y;
+      // Rotation-invariant check: distance from wrist to tip vs wrist to PIP
+      return getDistance(wrist, tip) > getDistance(wrist, pip);
     };
 
     // Thumb check using distance to index MCP relative to hand scale (prevents vertical ambiguity)
