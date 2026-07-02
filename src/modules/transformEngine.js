@@ -231,6 +231,7 @@ export class TransformEngine {
       return {
         x: rx + cx + tx,
         y: ry + cy + ty,
+        z: p.z,
       };
     });
   }
