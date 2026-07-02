@@ -26,6 +26,48 @@ const DrawingCanvas = forwardRef(({
     undo: () => managerRef.current?.undo(),
     redo: () => managerRef.current?.redo(),
     save: () => engineRef.current?.saveAsImage(),
+    exportOBJ: () => {
+      if (!managerRef.current) return '';
+      const strokes = managerRef.current.getAllStrokes();
+      let objText = "# AirDrawer 3D Export\n";
+      objText += "# Coordinates in pixels, Y-axis inverted for 3D viewers\n\n";
+
+      let vertexOffset = 1;
+      
+      strokes.forEach((stroke) => {
+        const points = stroke.transform
+          ? TransformEngine.getTransformedPoints(stroke)
+          : stroke.points;
+        
+        if (!points || points.length === 0) return;
+
+        objText += `# Stroke ${stroke.id}\n`;
+
+        // Write vertices
+        points.forEach((pt) => {
+          const xVal = pt.x;
+          // Invert Y coordinate for 3D coordinate systems (where Y is up)
+          const yVal = canvasRef.current.height - pt.y;
+          const zVal = pt.z !== undefined ? -pt.z : 0; // MediaPipe Z is inverted relative to standard WebGL Z
+          objText += `v ${xVal.toFixed(3)} ${yVal.toFixed(3)} ${zVal.toFixed(3)}\n`;
+        });
+
+        // Write elements (line or point)
+        if (points.length === 1) {
+          objText += `p ${vertexOffset}\n\n`;
+        } else {
+          objText += "l";
+          for (let i = 0; i < points.length; i++) {
+            objText += ` ${vertexOffset + i}`;
+          }
+          objText += "\n\n";
+        }
+
+        vertexOffset += points.length;
+      });
+
+      return objText;
+    }
   }));
 
   useEffect(() => {
@@ -88,23 +130,35 @@ const DrawingCanvas = forwardRef(({
     const y = landmark.y * canvasRef.current.height;
 
     switch (gesture) {
-      case 'DRAW':
+      case 'DRAW': {
+        const rawZ = landmark.z * canvasRef.current.width;
         if (!currentPathRef.current) {
           currentPathRef.current = {
-            points: [{ x, y }],
+            points: [{ x, y, z: rawZ }],
             color: settings.color,
             lineWidth: settings.lineWidth,
             glowIntensity: settings.glowIntensity,
           };
-          lastPointRef.current = { x, y };
+          lastPointRef.current = { x, y, z: rawZ };
         } else {
           const smoothFactor = 0.75;
           const smoothedX = lastPointRef.current.x * smoothFactor + x * (1 - smoothFactor);
           const smoothedY = lastPointRef.current.y * smoothFactor + y * (1 - smoothFactor);
-          currentPathRef.current.points.push({ x: smoothedX, y: smoothedY });
-          lastPointRef.current = { x: smoothedX, y: smoothedY };
+          
+          // Adaptive Z-smoothing based on distance to filter out far-distance amplification noise.
+          // Convert rawZ back to estimated depth: estimatedZ ranges from 2.5 (close) to 12.5 (far).
+          const normalizedZVal = rawZ / canvasRef.current.width;
+          const currentEstZ = 5.0 - (normalizedZVal / 0.15);
+          const t = Math.max(0, Math.min(1, (currentEstZ - 2.5) / 10.0)); // 0 = close, 1 = far
+          const zSmoothFactor = 0.70 + t * 0.24; // scales from 0.70 (responsive) to 0.94 (stable)
+
+          const lastZ = lastPointRef.current.z !== undefined ? lastPointRef.current.z : rawZ;
+          const smoothedZ = lastZ * zSmoothFactor + rawZ * (1 - zSmoothFactor);
+          currentPathRef.current.points.push({ x: smoothedX, y: smoothedY, z: smoothedZ });
+          lastPointRef.current = { x: smoothedX, y: smoothedY, z: smoothedZ };
         }
         break;
+      }
 
       case 'ERASE':
         saveCurrentPath();
