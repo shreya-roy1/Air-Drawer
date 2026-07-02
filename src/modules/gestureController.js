@@ -11,6 +11,10 @@ export class GestureController {
     this.currentGesture = GESTURES.IDLE;
     this.lastGesture = GESTURES.IDLE;
     this.gestureStartTime = Date.now();
+
+    // Debounce frame count for destructive CLEAR (fist) gesture
+    this.clearFrameCount = 0;
+    this.clearFramesRequired = 8; // Require 8 consecutive frames of CLEAR to trigger canvas clear
   }
 
   detectGesture(landmarks) {
@@ -24,15 +28,15 @@ export class GestureController {
     const middleBase = landmarks[9]; // landmark 9 is middle finger MCP
     const handScale = getDistance(wrist, middleBase) || 1.0;
 
-    // Standard fingers (index, middle, ring, pinky) are best checked via vertical coordinates when upright
+    // Standard fingers (index, middle, ring, pinky) checked via wrist-to-tip vs wrist-to-knuckle distance
     const isFingerUp = (fingerIndex) => {
       // Finger indices: 0:Thumb, 1:Index, 2:Middle, 3:Ring, 4:Pinky
       // Landmarks: Thumb(4), Index(8), Middle(12), Ring(16), Pinky(20)
       const wrist = landmarks[0];
+      const knuckle = landmarks[fingerIndex * 4 + 1];
       const tip = landmarks[fingerIndex * 4 + 4];
-      const pip = landmarks[fingerIndex * 4 + 2];
-      // Rotation-invariant check: distance from wrist to tip vs wrist to PIP
-      return getDistance(wrist, tip) > getDistance(wrist, pip);
+      // If extended, tip is further from wrist than knuckle; if curled in palm, tip is closer
+      return getDistance(wrist, tip) > getDistance(wrist, knuckle);
     };
 
     // Thumb check using distance to index MCP relative to hand scale (prevents vertical ambiguity)
@@ -60,14 +64,15 @@ export class GestureController {
     }
 
     // 3. Two Fingers (Index + Middle) -> MOVE
-    // Ignore thumb as thumb position can be ambiguous
-    if (indexUp && middleUp && !ringUp && !pinkyUp) {
+    // We only require index and middle to be up to trigger MOVE.
+    if (indexUp && middleUp) {
       return GESTURES.MOVE;
     }
 
     // 4. Index Finger ONLY (Pointing hand) -> DRAW
-    // Ignore thumb as thumb position can be ambiguous while pointing
-    if (indexUp && !middleUp && !ringUp && !pinkyUp) {
+    // We only require index to be up and middle to be down to trigger DRAW.
+    // This allows ring and pinky fingers to relax, preventing dropouts.
+    if (indexUp && !middleUp) {
       return GESTURES.DRAW;
     }
 
@@ -76,9 +81,23 @@ export class GestureController {
 
   update(landmarks) {
     const detected = this.detectGesture(landmarks);
-    if (detected !== this.currentGesture) {
+    
+    let resolvedGesture = detected;
+
+    // Debounce the destructive CLEAR gesture (fist shape)
+    if (detected === GESTURES.CLEAR) {
+      this.clearFrameCount++;
+      if (this.clearFrameCount < this.clearFramesRequired) {
+        // Fallback to IDLE to stop active drawing instantly without clearing the canvas yet
+        resolvedGesture = GESTURES.IDLE;
+      }
+    } else {
+      this.clearFrameCount = 0;
+    }
+
+    if (resolvedGesture !== this.currentGesture) {
       this.lastGesture = this.currentGesture;
-      this.currentGesture = detected;
+      this.currentGesture = resolvedGesture;
       this.gestureStartTime = Date.now();
     }
     return this.currentGesture;
