@@ -90,14 +90,14 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
               color: '#fff',
             }}
           >
-            <div style={{ maxWidth: isWelcome ? '460px' : '500px', width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ maxWidth: isWelcome ? '460px' : '500px', width: '100%', display: 'flex', flexDirection: 'column', gap: isWelcome ? '32px' : '20px' }}>
               {/* Header */}
               {isWelcome ? (
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: 'column',
                   alignItems: 'center', 
-                  marginBottom: '10px',
+                  marginBottom: '16px',
                   textAlign: 'center'
                 }}>
                   <Sparkles size={48} style={{ color: '#00ffff', marginBottom: '16px' }} />
@@ -145,17 +145,18 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
               {/* Privacy / Camera Alert Callout */}
               {isWelcome && (
                 <div style={{
-                  backgroundColor: 'rgba(0, 255, 255, 0.03)',
-                  border: '1px solid rgba(0, 255, 255, 0.15)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
                   borderRadius: '16px',
-                  padding: '16px',
-                  fontSize: '12px',
+                  padding: '20px',
+                  fontSize: '13px',
                   lineHeight: '1.6',
                   color: '#e2e8f0',
                   width: '100%',
                   boxSizing: 'border-box',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#00ffff', marginBottom: '8px', fontSize: '13px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#00ffff', marginBottom: '8px', fontSize: '14px' }}>
                     <span>📷</span> Camera Access & Privacy
                   </div>
                   We request camera access solely to interpret hand movements locally. 
@@ -168,33 +169,34 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '16px',
+                gap: '24px',
                 width: '100%',
               }}>
                 {displayedGestures.map((section, sIdx) => (
-                  <div key={sIdx} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div key={sIdx} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{
                       fontSize: '11px',
                       fontWeight: 800,
                       color: 'rgba(255, 255, 255, 0.75)',
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
-                      marginBottom: '2px',
+                      marginBottom: '4px',
                     }}>
                       {section.section}
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       {section.items.map((item, iIdx) => (
                         <div
                           key={iIdx}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '12px',
-                            padding: '10px 14px',
-                            borderRadius: '12px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.02)',
+                            gap: '16px',
+                            padding: '12px 18px',
+                            borderRadius: '16px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            backdropFilter: 'blur(16px)',
+                            WebkitBackdropFilter: 'blur(16px)',
                           }}
                         >
                           <span style={{ fontSize: '22px', width: '32px', textAlign: 'center' }}>{item.emoji}</span>
@@ -226,7 +228,7 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
                       fontWeight: 800,
                       fontSize: '14px',
                       cursor: 'pointer',
-                      marginTop: '10px',
+                      marginTop: '20px',
                       boxShadow: '0 4px 14px rgba(0, 255, 255, 0.2)',
                       transition: 'background-color 0.2s, transform 0.1s',
                     }}
