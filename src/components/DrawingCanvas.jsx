@@ -98,7 +98,7 @@ const DrawingCanvas = forwardRef(({
           };
           lastPointRef.current = { x, y };
         } else {
-          const smoothFactor = 0.15;
+          const smoothFactor = 0.75;
           const smoothedX = lastPointRef.current.x * smoothFactor + x * (1 - smoothFactor);
           const smoothedY = lastPointRef.current.y * smoothFactor + y * (1 - smoothFactor);
           currentPathRef.current.points.push({ x: smoothedX, y: smoothedY });
