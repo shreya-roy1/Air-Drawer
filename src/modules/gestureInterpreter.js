@@ -96,7 +96,28 @@ export class GestureInterpreter {
     // --- Process Primary Hand ---
     if (primaryLandmarks) {
       output.primary.gesture = this.primaryController.update(primaryLandmarks);
-      output.primary.landmark = primaryLandmarks[8]; // Index fingertip
+      
+      // Calculate absolute spatial depth based on hand scale (distance from wrist [0] to middle finger base [9])
+      const wrist = primaryLandmarks[0];
+      const middleBase = primaryLandmarks[9];
+      const dx = wrist.x - middleBase.x;
+      const dy = wrist.y - middleBase.y;
+      const handScale = Math.sqrt(dx * dx + dy * dy);
+      
+      // Invert handScale: moving closer (larger scale) makes Z smaller (closer)
+      const rawEstimatedZ = 1.0 / (handScale + 0.001);
+      // Clamp estimatedZ between 2.5 (close) and 12.5 (far) to prevent Z-axis spikes
+      const estimatedZ = Math.max(2.5, Math.min(12.5, rawEstimatedZ));
+      
+      // Map estimated depth to a normalized Z coordinate centered around a standard distance (estimatedZ = 5.0)
+      const normalizedZ = (5.0 - estimatedZ) * 0.15;
+
+      output.primary.landmark = {
+        x: primaryLandmarks[8].x,
+        y: primaryLandmarks[8].y,
+        z: normalizedZ
+      };
+
       output.primary.fingertips = [4, 8, 12, 16, 20].map(i => primaryLandmarks[i]);
     }
 
@@ -149,10 +170,10 @@ export class GestureInterpreter {
     const handScale = getDistance(wrist, middleBase) || 1.0;
 
     const isFingerUp = (fingerIndex) => {
+      const knuckle = landmarks[fingerIndex * 4 + 1];
       const tip = landmarks[fingerIndex * 4 + 4];
-      const pip = landmarks[fingerIndex * 4 + 2];
-      // Rotation-invariant check: distance from wrist to tip vs wrist to PIP
-      return getDistance(wrist, tip) > getDistance(wrist, pip);
+      // If extended, tip is further from wrist than knuckle; if curled in palm, tip is closer
+      return getDistance(wrist, tip) > getDistance(wrist, knuckle);
     };
 
     const indexUp = isFingerUp(1);
