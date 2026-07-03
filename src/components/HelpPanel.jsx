@@ -68,17 +68,17 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
             exit={isWelcome ? { scale: 1, opacity: 0 } : { scale: 0.9, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className={isWelcome ? "" : "glass-meta"}
+            className={isWelcome ? "custom-scrollbar" : "glass-meta custom-scrollbar"}
             style={isWelcome ? {
               width: '100%',
               height: '100%',
-              overflowY: 'hidden',
+              overflowY: 'auto',
               padding: '40px 24px',
               color: '#fff',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: 'flex-start',
               boxSizing: 'border-box',
               background: 'radial-gradient(circle at center, #111827 0%, #030712 100%)',
             } : {
@@ -90,7 +90,15 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
               color: '#fff',
             }}
           >
-            <div style={{ maxWidth: isWelcome ? '460px' : '500px', width: '100%', display: 'flex', flexDirection: 'column', gap: isWelcome ? '32px' : '20px' }}>
+            <div style={{
+              maxWidth: isWelcome ? '460px' : '500px',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isWelcome ? '32px' : '20px',
+              marginTop: isWelcome ? 'auto' : undefined,
+              marginBottom: isWelcome ? 'auto' : undefined,
+            }}>
               {/* Header */}
               {isWelcome ? (
                 <div style={{ 

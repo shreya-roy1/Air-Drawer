@@ -175,7 +175,7 @@ const ControlPanel = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="glass-meta"
+            className="glass-meta custom-scrollbar"
             initial={{ opacity: 0, x: 20, scale: 0.95 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 20, scale: 0.95 }}
@@ -188,6 +188,8 @@ const ControlPanel = ({
               flexDirection: 'column',
               gap: '24px',
               marginTop: '12px',
+              maxHeight: 'calc(100vh - 100px)',
+              overflowY: 'auto',
             }}
           >
             {/* Color Palette */}
