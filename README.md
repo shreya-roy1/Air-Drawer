@@ -2,6 +2,8 @@
 
 Step into the future of digital creation. Air Draw is a high-performance web application that transforms your physical environment into a real-time, "Minority Report"-inspired spatial canvas using advanced AI hand tracking. Seamlessly sketch in mid-air with your dominant hand, while using your non-dominant hand to fluidly move, scale, and rotate your designs through intuitive gestures.
 
+---
+
 ## ✨ Core Capabilities
 
 * **✋ Dual-Hand Interaction Model**: 
@@ -13,6 +15,8 @@ Step into the future of digital creation. Air Draw is a high-performance web app
 * **🌀 Physics-Driven Mechanics**: Experience natural momentum with smooth stroke inertia and crisp 45° angle snapping during rotations.
 * **📖 Interactive Gesture Guide**: An integrated, accessible manual detailing every spatial command.
 
+---
+
 ## 🛠️ Technology Architecture
 
 * **Frontend Framework**: React + Vite
@@ -20,6 +24,8 @@ Step into the future of digital creation. Air Draw is a high-performance web app
 * **Motion & Animation**: Framer Motion
 * **Iconography**: Lucide React (augmented with custom inline SVG fallbacks for brand elements)
 * **Styling Engine**: Vanilla CSS (Modern Glassmorphism & Neon UI aesthetics)
+
+---
 
 ## 🎮 Gesture Reference Guide
 
@@ -39,6 +45,8 @@ Step into the future of digital creation. Air Draw is a high-performance web app
 | 🤏 **Pinch & Spread** | **Scale** stroke dimensions | Concentric rings + active % label |
 | 🤚 **Open Palm** | **Rotate** stroke along axis | Orange arc + snap-point indicators |
 
+---
+
 ## 🚀 Installation & Setup
 
 1.  **Install Dependencies**:
@@ -52,4 +60,5 @@ Step into the future of digital creation. Air Draw is a high-performance web app
 3.  **Initialize**: Grant camera permissions in your browser, step back, and raise your hands into the frame.
 
 ---
-*Built with a passion for AI and Spatial Computing.*
+
+*🪄 Built with a passion for AI and Spatial Computing.*
