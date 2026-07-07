@@ -4,9 +4,8 @@ import DrawingCanvas from './components/DrawingCanvas';
 import HelpPanel from './components/HelpPanel';
 import ControlPanel from './components/ControlPanel';
 import { GestureInterpreter, CONTROL_GESTURES } from './modules/gestureInterpreter';
-import { GESTURES } from './modules/gestureController';
 import { useCanvasSync } from './hooks/useCanvasSync';
-import { motion, AnimatePresence } from 'framer-motion';
+import { GESTURES } from './modules/gestureController';
 import './App.css';
 
 function App() {
