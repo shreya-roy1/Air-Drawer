@@ -8,6 +8,7 @@ export const CONTROL_GESTURES = {
   MOVE: 'CTRL_MOVE',
   SCALE: 'CTRL_SCALE',
   ROTATE: 'CTRL_ROTATE',
+  CLOSED_FIST: 'CTRL_CLOSED_FIST',
 };
 
 /**
@@ -65,32 +66,21 @@ export class GestureInterpreter {
     let primaryLandmarks = null;
     let secondaryLandmarks = null;
 
-    if (results.multiHandLandmarks.length === 1) {
-      // Only one hand: treat it as primary (drawing hand)
-      primaryLandmarks = results.multiHandLandmarks[0];
-      this.lastPinchDistance = null;
-      this.lastHandAngle = null;
-    } else if (results.multiHandLandmarks.length >= 2) {
-      // Two hands detected: use handedness to assign roles
-      const handedness = results.multiHandedness || [];
-
-      let primaryIdx = 0;
-      let secondaryIdx = 1;
-
-      // MediaPipe reports handedness from the camera's perspective (mirrored).
-      // "Right" label = user's left hand, "Left" label = user's right hand.
-      // We want user's right hand = primary = "Left" label in MediaPipe.
-      if (handedness.length >= 2) {
-        const label0 = handedness[0]?.label || '';
-        if (label0 === 'Right') {
-          // Index 0 is user's left hand → secondary
-          primaryIdx = 1;
-          secondaryIdx = 0;
+    if (results.multiHandLandmarks && results.multiHandedness) {
+      for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+        const landmarks = results.multiHandLandmarks[i];
+        const handedness = results.multiHandedness[i];
+        if (handedness) {
+          const label = handedness.label; // 'Left' or 'Right'
+          if (label === 'Left') {
+            // MediaPipe 'Left' is user's Right hand (Dominant/Primary)
+            primaryLandmarks = landmarks;
+          } else if (label === 'Right') {
+            // MediaPipe 'Right' is user's Left hand (Non-Dominant/Secondary)
+            secondaryLandmarks = landmarks;
+          }
         }
       }
-
-      primaryLandmarks = results.multiHandLandmarks[primaryIdx];
-      secondaryLandmarks = results.multiHandLandmarks[secondaryIdx];
     }
 
     // --- Process Primary Hand ---
@@ -182,6 +172,7 @@ export class GestureInterpreter {
     const pinkyUp = isFingerUp(4);
 
     const thumbTip = landmarks[4];
+    const indexMCP = landmarks[5];
     const indexTip = landmarks[8];
 
     // Pinch distance
@@ -190,6 +181,15 @@ export class GestureInterpreter {
 
     // Hand angle (wrist → middle finger base)
     const handAngle = Math.atan2(middleBase.y - wrist.y, middleBase.x - wrist.x);
+
+    // === CLOSED FIST: All fingers curled in (including thumb check) ===
+    const thumbUp = (getDistance(thumbTip, indexMCP) / handScale) > 0.35;
+    if (!indexUp && !middleUp && !ringUp && !pinkyUp && !thumbUp) {
+      result.gesture = CONTROL_GESTURES.CLOSED_FIST;
+      this.lastPinchDistance = null;
+      this.lastHandAngle = null;
+      return result;
+    }
 
     // === SCALE: Pinch gesture (thumb + index very close) ===
     if (relativePinchDist < 0.25) {
