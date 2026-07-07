@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Palette,
@@ -41,13 +42,14 @@ const ControlPanel = ({
   onToggleGrid
 }) => {
   const [isOpen, setIsOpen] = useState(true);
-  const [isLightBg, setIsLightBg] = useState(false);
+  const [rawIsLightBg, setRawIsLightBg] = useState(false);
   const containerRef = useRef(null);
   const offscreenCanvasRef = useRef(null);
 
+  const isLightBg = cameraVisible && rawIsLightBg;
+
   useEffect(() => {
     if (!cameraVisible) {
-      setIsLightBg(false);
       return;
     }
 
@@ -112,7 +114,7 @@ const ControlPanel = ({
         const thresholdLight = 145;
         const thresholdDark = 125;
 
-        setIsLightBg(prev => {
+        setRawIsLightBg(prev => {
           if (prev) {
             return avgLuminance > thresholdDark;
           } else {
