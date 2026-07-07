@@ -4,8 +4,9 @@ import DrawingCanvas from './components/DrawingCanvas';
 import HelpPanel from './components/HelpPanel';
 import ControlPanel from './components/ControlPanel';
 import { GestureInterpreter, CONTROL_GESTURES } from './modules/gestureInterpreter';
-import { GESTURES } from './modules/gestureController';
 import { useCanvasSync } from './hooks/useCanvasSync';
+import { GESTURES } from './modules/gestureController';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import './App.css';
 
