@@ -5,7 +5,7 @@ const FILTER_SIZE = 5;
 export function useMultiplayerState() {
   const [strokes, setStrokes] = useState([]);
   const [currentPath, setCurrentPath] = useState(null);
-  const [redoStack, setRedoStack] = useState([]);
+  const [_redoStack, setRedoStack] = useState([]);
 
   // Track raw coordinates for moving average filtering on the active stroke
   const rawPointsHistory = useRef([]);
