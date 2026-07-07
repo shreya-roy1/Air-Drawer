@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, HelpCircle, Sparkles } from 'lucide-react';
 
 // Custom Minimalist SVG Icons replacing standard OS emojis
