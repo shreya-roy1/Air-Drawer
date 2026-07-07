@@ -1,34 +1,67 @@
 import React, { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { DrawingEngine } from '../modules/drawingEngine';
 import { StrokeManager } from '../modules/strokeManager';
-import { InteractionEngine } from '../modules/interactionEngine';
 import { TransformEngine } from '../modules/transformEngine';
 
 const DrawingCanvas = forwardRef(({ 
-  settings, gesture, landmark,
-  controlGesture, controlLandmark, controlPinchDelta, controlAngleDelta
+  settings, 
+  gesture, 
+  landmark,
+  controlGesture, 
+  controlLandmark, 
+  controlPinchDelta, 
+  controlAngleDelta,
+  canvasSync,
+  globalRotation,
+  gridVisible,
+  estimatedZ,
+  handX,
+  handY,
+  trackingResults
 }, ref) => {
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
   const managerRef = useRef(null);
-  const interactionRef = useRef(null);
   const transformRef = useRef(null);
 
-  // Current in-progress path
+  // Sync React state and context variables into refs for the high-frequency render loop
+  const canvasSyncRef = useRef(canvasSync);
+  const strokesRef = useRef([]);
   const currentPathRef = useRef(null);
-  const lastPointRef = useRef(null);
-
-  // Track control gesture for rendering
   const controlGestureRef = useRef('CTRL_IDLE');
+  
+  const globalRotationRef = useRef(globalRotation);
+  const gridVisibleRef = useRef(gridVisible);
+  const estimatedZRef = useRef(estimatedZ);
+  const handXRef = useRef(handX);
+  const handYRef = useRef(handY);
+  const trackingResultsRef = useRef(trackingResults);
+
+  useEffect(() => { canvasSyncRef.current = canvasSync; }, [canvasSync]);
+  useEffect(() => { trackingResultsRef.current = trackingResults; }, [trackingResults]);
+  useEffect(() => { 
+    strokesRef.current = canvasSync.strokes; 
+    // Synchronize stroke data into local StrokeManager for hit-testing and select-nearest calculations
+    if (managerRef.current) {
+      managerRef.current.strokes = canvasSync.strokes;
+    }
+  }, [canvasSync.strokes]);
+  useEffect(() => { currentPathRef.current = canvasSync.currentPath; }, [canvasSync.currentPath]);
+  useEffect(() => { globalRotationRef.current = globalRotation; }, [globalRotation]);
+  useEffect(() => { gridVisibleRef.current = gridVisible; }, [gridVisible]);
+  useEffect(() => { estimatedZRef.current = estimatedZ; }, [estimatedZ]);
+  useEffect(() => { handXRef.current = handX; }, [handX]);
+  useEffect(() => { handYRef.current = handY; }, [handY]);
 
   useImperativeHandle(ref, () => ({
-    clear: () => managerRef.current?.clear(),
-    undo: () => managerRef.current?.undo(),
-    redo: () => managerRef.current?.redo(),
+    clear: () => canvasSyncRef.current.clear(),
+    undo: () => canvasSyncRef.current.undo(),
+    redo: () => canvasSyncRef.current.redo(),
     save: () => engineRef.current?.saveAsImage(),
     exportOBJ: () => {
-      if (!managerRef.current) return '';
-      const strokes = managerRef.current.getAllStrokes();
+      const strokes = canvasSyncRef.current.strokes;
+      if (!strokes || strokes.length === 0) return '';
+      
       let objText = "# AirDrawer 3D Export\n";
       objText += "# Coordinates in pixels, Y-axis inverted for 3D viewers\n\n";
 
@@ -46,13 +79,13 @@ const DrawingCanvas = forwardRef(({
         // Write vertices
         points.forEach((pt) => {
           const xVal = pt.x;
-          // Invert Y coordinate for 3D coordinate systems (where Y is up)
-          const yVal = canvasRef.current.height - pt.y;
-          const zVal = pt.z !== undefined ? -pt.z : 0; // MediaPipe Z is inverted relative to standard WebGL Z
+          // Invert Y coordinate for 3D coordinates (where Y is up)
+          const yVal = window.innerHeight - pt.y;
+          const zVal = pt.z !== undefined ? -pt.z : 0;
           objText += `v ${xVal.toFixed(3)} ${yVal.toFixed(3)} ${zVal.toFixed(3)}\n`;
         });
 
-        // Write elements (line or point)
+        // Write elements
         if (points.length === 1) {
           objText += `p ${vertexOffset}\n\n`;
         } else {
@@ -76,21 +109,26 @@ const DrawingCanvas = forwardRef(({
     canvas.height = window.innerHeight;
 
     managerRef.current = new StrokeManager();
-    interactionRef.current = new InteractionEngine(managerRef.current);
-    transformRef.current = new TransformEngine(managerRef.current);
+    transformRef.current = new TransformEngine(managerRef.current, (id, newTransform) => {
+      canvasSyncRef.current.updateStrokeTransform(id, newTransform);
+    });
     engineRef.current = new DrawingEngine(canvas);
 
     let animationFrameId;
     const renderLoop = () => {
-      if (engineRef.current && managerRef.current) {
-        const selectedId = transformRef.current?.getSelectedStrokeId() 
-          ?? interactionRef.current?.getSelectedStrokeId() 
-          ?? null;
+      if (engineRef.current) {
+        const selectedId = transformRef.current?.getSelectedStrokeId() ?? null;
         engineRef.current.draw(
-          managerRef.current.getAllStrokes(),
+          strokesRef.current,
           currentPathRef.current,
           selectedId,
-          controlGestureRef.current
+          controlGestureRef.current,
+          globalRotationRef.current,
+          gridVisibleRef.current,
+          estimatedZRef.current,
+          handXRef.current,
+          handYRef.current,
+          trackingResultsRef.current
         );
       }
       animationFrameId = requestAnimationFrame(renderLoop);
@@ -109,85 +147,59 @@ const DrawingCanvas = forwardRef(({
     };
   }, []);
 
-  const saveCurrentPath = () => {
-    if (currentPathRef.current) {
-      managerRef.current.addStroke(
-        currentPathRef.current.points,
-        currentPathRef.current.color,
-        currentPathRef.current.lineWidth,
-        currentPathRef.current.glowIntensity
-      );
-      currentPathRef.current = null;
-      lastPointRef.current = null;
-    }
-  };
-
   // === PRIMARY HAND: Drawing gestures ===
   useEffect(() => {
-    if (!landmark || !managerRef.current || !interactionRef.current) return;
+    if (!landmark || !managerRef.current) return;
 
-    const x = (1 - landmark.x) * canvasRef.current.width;
-    const y = landmark.y * canvasRef.current.height;
+    // Lock drawing state if secondary hand is globally rotating the scene
+    if (controlGesture === 'CTRL_CLOSED_FIST') {
+      canvasSyncRef.current.endStroke();
+      return;
+    }
+
+    const x = (1 - landmark.x) * window.innerWidth;
+    const y = landmark.y * window.innerHeight;
 
     switch (gesture) {
       case 'DRAW': {
-        const rawZ = landmark.z * canvasRef.current.width;
+        const rawZ = landmark.z * window.innerWidth;
         if (!currentPathRef.current) {
-          currentPathRef.current = {
-            points: [{ x, y, z: rawZ }],
-            color: settings.color,
-            lineWidth: settings.lineWidth,
-            glowIntensity: settings.glowIntensity,
-          };
-          lastPointRef.current = { x, y, z: rawZ };
-        } else {
-          const smoothFactor = 0.75;
-          const smoothedX = lastPointRef.current.x * smoothFactor + x * (1 - smoothFactor);
-          const smoothedY = lastPointRef.current.y * smoothFactor + y * (1 - smoothFactor);
-          
-          // Adaptive Z-smoothing based on distance to filter out far-distance amplification noise.
-          // Convert rawZ back to estimated depth: estimatedZ ranges from 2.5 (close) to 12.5 (far).
-          const normalizedZVal = rawZ / canvasRef.current.width;
-          const currentEstZ = 5.0 - (normalizedZVal / 0.15);
-          const t = Math.max(0, Math.min(1, (currentEstZ - 2.5) / 10.0)); // 0 = close, 1 = far
-          const zSmoothFactor = 0.70 + t * 0.24; // scales from 0.70 (responsive) to 0.94 (stable)
-
-          const lastZ = lastPointRef.current.z !== undefined ? lastPointRef.current.z : rawZ;
-          const smoothedZ = lastZ * zSmoothFactor + rawZ * (1 - zSmoothFactor);
-          currentPathRef.current.points.push({ x: smoothedX, y: smoothedY, z: smoothedZ });
-          lastPointRef.current = { x: smoothedX, y: smoothedY, z: smoothedZ };
+          canvasSyncRef.current.startStroke(settings.color, settings.lineWidth, settings.glowIntensity);
         }
+        canvasSyncRef.current.addPoint({ x, y, z: rawZ });
         break;
       }
 
-      case 'ERASE':
-        saveCurrentPath();
-        interactionRef.current.handleErase(x, y);
+      case 'ERASE': {
+        canvasSyncRef.current.endStroke();
+        const hits = managerRef.current.findIntersectingStrokes(x, y, 30);
+        hits.forEach(id => canvasSyncRef.current.removeStroke(id));
         break;
+      }
 
       case 'CLEAR':
-        saveCurrentPath();
-        managerRef.current.clear();
+        canvasSyncRef.current.endStroke();
+        canvasSyncRef.current.clear();
         break;
 
       default:
-        saveCurrentPath();
+        canvasSyncRef.current.endStroke();
         break;
     }
-  }, [gesture, landmark, settings]);
+  }, [gesture, landmark, settings, controlGesture]);
 
   // === SECONDARY HAND: Control gestures (move/scale/rotate) ===
   useEffect(() => {
     if (!transformRef.current) return;
     controlGestureRef.current = controlGesture || 'CTRL_IDLE';
 
-    if (!controlLandmark) {
+    if (!controlLandmark || controlGesture === 'CTRL_CLOSED_FIST') {
       transformRef.current.releaseAll();
       return;
     }
 
-    const x = (1 - controlLandmark.x) * canvasRef.current.width;
-    const y = controlLandmark.y * canvasRef.current.height;
+    const x = (1 - controlLandmark.x) * window.innerWidth;
+    const y = controlLandmark.y * window.innerHeight;
 
     switch (controlGesture) {
       case 'CTRL_MOVE':
@@ -195,7 +207,6 @@ const DrawingCanvas = forwardRef(({
         break;
 
       case 'CTRL_SCALE':
-        // First, select nearest if not already selected
         transformRef.current.selectNearest(x, y);
         transformRef.current.handleScale(controlPinchDelta || 0);
         break;
