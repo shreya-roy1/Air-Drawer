@@ -68,7 +68,7 @@ const CameraView = ({ onResults }) => {
           height: '100%',
           objectFit: 'cover',
           transform: 'scaleX(-1)', // Mirror effect
-          filter: 'brightness(0.28) contrast(1.1) saturate(0.55)', // Beautiful, muted, dark perspective
+          filter: 'brightness(0.35) contrast(1.1) saturate(0.55) blur(10px)', // Beautiful, muted, dark, blurly visible perspective
           border: 'none',
         }}
         playsInline
