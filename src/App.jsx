@@ -5,15 +5,25 @@ import HelpPanel from './components/HelpPanel';
 import ControlPanel from './components/ControlPanel';
 import { GestureInterpreter, CONTROL_GESTURES } from './modules/gestureInterpreter';
 import { GESTURES } from './modules/gestureController';
+import { useCanvasSync } from './hooks/useCanvasSync';
 import { motion, AnimatePresence } from 'framer-motion';
 import './App.css';
 
 function App() {
+  // --- React State Declarations (Placed at top to prevent ReferenceError / Hoisting issues) ---
   const [settings, setSettings] = useState({
     color: '#00ffff',
     lineWidth: 8,
     glowIntensity: 20,
   });
+
+  const [cameraVisible, setCameraVisible] = useState(true);
+  const [gesturesEnabled, setGesturesEnabled] = useState(true);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [hasAcceptedOnboarding, setHasAcceptedOnboarding] = useState(false);
+
+  // Central canvas synchronizer state hook
+  const canvasSync = useCanvasSync();
 
   // Primary hand (drawing)
   const [gesture, setGesture] = useState(GESTURES.IDLE);
@@ -27,15 +37,19 @@ function App() {
   const [controlPinchDelta, setControlPinchDelta] = useState(0);
   const [controlAngleDelta, setControlAngleDelta] = useState(0);
 
-  const [cameraVisible, setCameraVisible] = useState(true);
-  const [gesturesEnabled, setGesturesEnabled] = useState(true);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [hasAcceptedOnboarding, setHasAcceptedOnboarding] = useState(false);
+  // Global 3D camera properties & overlays
+  const [globalRotation, setGlobalRotation] = useState({ x: 0, y: 0 });
+  const [gridVisible, setGridVisible] = useState(true);
+  const [trackingResults, setTrackingResults] = useState(null);
 
   const canvasRef = useRef(null);
   const interpreter = useMemo(() => new GestureInterpreter(), []);
+  const lastSecondaryLandmarkRef = useRef(null);
 
   const onResults = useCallback((results) => {
+    // Keep raw tracking results for the joint skeleton overlays
+    setTrackingResults(results);
+
     if (!gesturesEnabled) {
       setGesture(GESTURES.IDLE);
       setLandmark(null);
@@ -43,22 +57,39 @@ function App() {
       setControlGesture(CONTROL_GESTURES.IDLE);
       setControlLandmark(null);
       setControlFingertips([]);
+      lastSecondaryLandmarkRef.current = null;
       return;
     }
 
     const { primary, secondary } = interpreter.interpret(results);
 
-    // Primary hand
+    // Primary hand (drawing)
     setGesture(primary.gesture);
     setLandmark(primary.landmark);
     setFingertips(primary.fingertips);
 
-    // Secondary hand
+    // Secondary hand (control)
     setControlGesture(secondary.gesture);
     setControlLandmark(secondary.landmark);
     setControlFingertips(secondary.fingertips);
     setControlPinchDelta(secondary.pinchDelta);
     setControlAngleDelta(secondary.angleDelta);
+
+    // Bimanual rotation: update global scene rotation based on non-dominant hand X/Y deltas
+    if (secondary.gesture === CONTROL_GESTURES.CLOSED_FIST && secondary.landmark) {
+      if (lastSecondaryLandmarkRef.current) {
+        const dx = secondary.landmark.x - lastSecondaryLandmarkRef.current.x;
+        const dy = secondary.landmark.y - lastSecondaryLandmarkRef.current.y;
+
+        setGlobalRotation(prev => ({
+          x: Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, prev.x + dy * 3.5)), // limit pitch to prevent complete inversion
+          y: prev.y - dx * 3.5 // yaw
+        }));
+      }
+      lastSecondaryLandmarkRef.current = secondary.landmark;
+    } else {
+      lastSecondaryLandmarkRef.current = null;
+    }
   }, [interpreter, gesturesEnabled]);
 
   const handleSave = () => {
@@ -85,12 +116,14 @@ function App() {
   };
 
   // Determine active mode label for the HUD
-  const activeMode = controlGesture !== CONTROL_GESTURES.IDLE
-    ? controlGesture.replace('CTRL_', '')
-    : gesture;
+  const activeMode = controlGesture === 'CTRL_CLOSED_FIST'
+    ? 'ROTATE CANVAS'
+    : (controlGesture !== CONTROL_GESTURES.IDLE
+      ? controlGesture.replace('CTRL_', '')
+      : gesture);
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{ background: 'radial-gradient(circle at center, #111827 0%, #030712 100%)' }}>
       {hasAcceptedOnboarding && cameraVisible && (
         <CameraView
           onResults={onResults}
@@ -106,14 +139,21 @@ function App() {
         controlLandmark={controlLandmark}
         controlPinchDelta={controlPinchDelta}
         controlAngleDelta={controlAngleDelta}
+        canvasSync={canvasSync}
+        globalRotation={globalRotation}
+        gridVisible={gridVisible}
+        estimatedZ={landmark ? 5.0 - (landmark.z / 0.15) : 5.0}
+        handX={landmark ? (1 - landmark.x) * window.innerWidth : null}
+        handY={landmark ? landmark.y * window.innerHeight : null}
+        trackingResults={trackingResults}
       />
 
       <ControlPanel
         settings={settings}
         onSettingsChange={(newSettings) => setSettings(prev => ({ ...prev, ...newSettings }))}
-        onClear={() => canvasRef.current?.clear()}
-        onUndo={() => canvasRef.current?.undo()}
-        onRedo={() => canvasRef.current?.redo()}
+        onClear={() => canvasSync.clear()}
+        onUndo={() => canvasSync.undo()}
+        onRedo={() => canvasSync.redo()}
         onSave={handleSave}
         onExportOBJ={handleExportOBJ}
         onToggleCamera={() => setCameraVisible(!cameraVisible)}
@@ -121,6 +161,8 @@ function App() {
         gestureVisible={gesturesEnabled}
         onToggleGestures={() => setGesturesEnabled(!gesturesEnabled)}
         onHelp={() => setIsHelpOpen(true)}
+        gridVisible={gridVisible}
+        onToggleGrid={() => setGridVisible(!gridVisible)}
       />
 
       <HelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} isWelcome={false} />
@@ -157,7 +199,6 @@ function App() {
             opacity = 1;
           } else {
             // Apply dynamic visual feedback based on absolute Z depth
-            // landmark.z ranges roughly from -0.75 (far) to 0.35 (close)
             const depthFactor = landmark ? (landmark.z + 1.0) / 1.35 : 0.6;
             const clampedFactor = Math.max(0.4, Math.min(1.4, depthFactor));
             size = `${14 * clampedFactor}px`;
@@ -206,6 +247,8 @@ function App() {
             border = '2px solid rgba(0, 255, 200, 0.9)';
           } else if (controlGesture === CONTROL_GESTURES.ROTATE) {
             border = '2px solid rgba(255, 165, 0, 0.9)';
+          } else if (controlGesture === CONTROL_GESTURES.CLOSED_FIST) {
+            border = '2px solid rgba(255, 80, 80, 0.9)';
           }
         }
 
@@ -230,8 +273,40 @@ function App() {
       })}
 
       {!landmark && !controlLandmark && (
-        <div className="overlay-message">
-          <span className="pulse-emoji">👋</span> Raise your hand to start drawing
+        <div className="overlay-message" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', pointerEvents: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#06b6d4"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                animation: 'wave-pulse 2.2s infinite ease-in-out',
+                transformOrigin: '70% 70%',
+                filter: 'drop-shadow(0 0 8px rgba(6, 182, 212, 0.6))'
+              }}
+            >
+              <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5" />
+              <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6" />
+              <path d="M10 10V5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6" />
+              <path d="M6 13V9a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v7c0 4.4 3.6 8 8 8h3c4.4 0 8-3.6 8-8v-3a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+              <circle cx="10" cy="5" r="1.2" fill="#fff" />
+              <circle cx="14" cy="4" r="1.2" fill="#fff" />
+              <circle cx="18" cy="6" r="1.2" fill="#fff" />
+              <circle cx="6" cy="9" r="1.2" fill="#fff" />
+              <circle cx="22" cy="11" r="1.2" fill="#fff" />
+            </svg>
+            <span style={{ fontSize: '24px', fontWeight: 600, color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+              Position your hand to begin drawing
+            </span>
+          </div>
+          <div style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.45)', fontWeight: 300 }}>
+            Full camera view is active. Use the right panel to toggle features like the 3D grid
+          </div>
         </div>
       )}
     </div>
