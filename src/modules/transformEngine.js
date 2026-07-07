@@ -3,8 +3,9 @@
  * Strokes retain their original point data; transforms are applied at render time.
  */
 export class TransformEngine {
-  constructor(strokeManager) {
+  constructor(strokeManager, onTransformChange = null) {
     this.strokeManager = strokeManager;
+    this.onTransformChange = onTransformChange;
 
     // Selection state
     this.selectedStrokeId = null;
@@ -85,6 +86,7 @@ export class TransformEngine {
       const dy = y - this.lastY;
       stroke.transform.tx += dx;
       stroke.transform.ty += dy;
+      this.onTransformChange?.(stroke.id, stroke.transform);
 
       // Track velocity for inertia
       this.velocityX = dx;
@@ -111,6 +113,7 @@ export class TransformEngine {
 
     // Clamp scale
     stroke.transform.scale = Math.max(0.1, Math.min(5, stroke.transform.scale));
+    this.onTransformChange?.(stroke.id, stroke.transform);
   }
 
   // ========================
@@ -124,6 +127,7 @@ export class TransformEngine {
     if (!stroke) return;
 
     stroke.transform.rotation += angleDelta;
+    this.onTransformChange?.(stroke.id, stroke.transform);
   }
 
   /**
@@ -136,6 +140,7 @@ export class TransformEngine {
 
     const snap = Math.PI / 4; // 45 degrees
     stroke.transform.rotation = Math.round(stroke.transform.rotation / snap) * snap;
+    this.onTransformChange?.(stroke.id, stroke.transform);
   }
 
   // ========================
@@ -174,6 +179,7 @@ export class TransformEngine {
 
       stroke.transform.tx += this.velocityX;
       stroke.transform.ty += this.velocityY;
+      this.onTransformChange?.(stroke.id, stroke.transform);
 
       if (Math.abs(this.velocityX) < 0.1 && Math.abs(this.velocityY) < 0.1) {
         this.inertiaActive = false;
