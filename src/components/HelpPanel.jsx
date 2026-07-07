@@ -2,29 +2,95 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, HelpCircle, Sparkles } from 'lucide-react';
 
+// Custom Minimalist SVG Icons replacing standard OS emojis
+const IndexFingerIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: 'auto' }}>
+    <path d="M12 2v9M12 11c0-1.1-.9-2-2-2s-2 .9-2 2v5c0 2.2 1.8 4 4 4h1c2.2 0 4-1.8 4-4v-3c0-1.1-.9-2-2-2s-2 .9-2 2" />
+  </svg>
+);
+
+const PinchIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: 'auto' }}>
+    <path d="M9 10c0-1.1.9-2 2-2s2 .9 2 2v3c0 .5-.5 1-1 1s-1-.5-1-1v-2" />
+    <path d="M12 11c0-1.1.9-2 2-2s2 .9 2 2v2" />
+    <path d="M15 13c0-1.1.9-2 2-2s2 .9 2 2v1" />
+    <path d="M8 12c-1.1 0-2-.9-2-2V9c0-1.1.9-2 2-2s2 .9 2 2v3" />
+    <path d="M6 15c0 2.2 1.8 4 4 4h3c2.2 0 4-1.8 4-4v-1.5c0-.8-.7-1.5-1.5-1.5h-1c-.5 0-1 .5-1 1" />
+  </svg>
+);
+
+const FistIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: 'auto' }}>
+    <path d="M8 10h8c1.1 0 2 .9 2 2v3c0 2.2-1.8 4-4 4h-4c-2.2 0-4-1.8-4-4v-3c0-1.1.9-2 2-2z" />
+    <path d="M6 10V8c0-1.1.9-2 2-2s2 .9 2 2v2M10 10V8c0-1.1.9-2 2-2s2 .9 2 2v2M14 10V8c0-1.1.9-2 2-2s2 .9 2 2v2" />
+  </svg>
+);
+
+const TwoFingersIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: 'auto' }}>
+    <path d="M9 10V4c0-1.1.9-2 2-2s2 .9 2 2v6M13 10V5c0-1.1.9-2 2-2s2 .9 2 2v5M9 10c0-1.1-.9-2-2-2s-2 .9-2 2v6c0 2.2 1.8 4 4 4h3c2.2 0 4-1.8 4-4v-5c0-1.1-.9-2-2-2s-2 .9-2 2" />
+  </svg>
+);
+
+const OpenPalmIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: 'auto' }}>
+    <path d="M6 11V6c0-1.1.9-2 2-2s2 .9 2 2v5M10 11V4c0-1.1.9-2 2-2s2 .9 2 2v5M14 11V5c0-1.1.9-2 2-2s2 .9 2 2v6M18 12V8c0-1.1.9-2 2-2s2 .9 2 2v5c0 2.2-1.8 4-4 4h-5c-2.2 0-4-1.8-4-4V9.5c0-1.1.9-2 2-2s2 .9 2 2V12" />
+  </svg>
+);
+
+const TipIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: 'auto', color: '#eab308' }}>
+    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .3 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+    <path d="M9 18h6" />
+    <path d="M10 22h4" />
+  </svg>
+);
+
+const RulerIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: 'auto', color: '#06b6d4' }}>
+    <path d="M22 22L2 2v20h20z" />
+    <path d="M6 18l4-4" />
+    <path d="M10 18l4-4" />
+  </svg>
+);
+
+const SpiralIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: 'auto', color: '#a855f7' }}>
+    <path d="M12 2a10 10 0 1 0 10 10c0-4.4-3.6-8-8-8s-6 3.6-6 8 3.6 4 4 4 2-1.8 2-4-1.8-2-2-2" />
+  </svg>
+);
+
+const CameraIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', color: '#00ffff' }}>
+    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+    <circle cx="12" cy="13" r="3" />
+  </svg>
+);
+
 const gestures = [
   {
     section: 'Right Hand (Draw)',
     items: [
-      { emoji: '☝️', gesture: 'Index finger up', action: 'Draw strokes' },
-      { emoji: '🤏', gesture: 'Pinch (thumb + index)', action: 'Erase nearby strokes' },
-      { emoji: '✊', gesture: 'Fist', action: 'Clear all' },
+      { icon: <IndexFingerIcon />, gesture: 'Index finger up', action: 'Draw lines in the air' },
+      { icon: <PinchIcon />, gesture: 'Pinch (thumb + index)', action: 'Erase nearby strokes' },
+      { icon: <FistIcon />, gesture: 'Fist', action: 'Clear all strokes' },
     ],
   },
   {
-    section: 'Left Hand (Control)',
+    section: 'Left Hand (Control & Transform)',
     items: [
-      { emoji: '✌️', gesture: 'Two fingers up', action: 'Select & Move stroke' },
-      { emoji: '🤏', gesture: 'Pinch + spread/close', action: 'Scale stroke' },
-      { emoji: '🖐️', gesture: 'Open palm + twist', action: 'Rotate stroke' },
+      { icon: <TwoFingersIcon />, gesture: 'Two fingers up', action: 'Select & Move stroke' },
+      { icon: <PinchIcon />, gesture: 'Pinch + spread/close', action: 'Scale stroke' },
+      { icon: <OpenPalmIcon />, gesture: 'Open palm + twist', action: 'Rotate stroke' },
+      { icon: <FistIcon />, gesture: 'Closed Fist (hold & drag)', action: 'Globally rotate 3D canvas' },
     ],
   },
   {
-    section: 'Tips',
+    section: 'System Tips',
     items: [
-      { emoji: '💡', gesture: 'One hand only', action: 'Auto-assigned as draw hand' },
-      { emoji: '📐', gesture: 'Release rotate', action: 'Snaps to nearest 45°' },
-      { emoji: '🌀', gesture: 'Release move', action: 'Slight inertia drift' },
+      { icon: <TipIcon />, gesture: 'One hand only', action: 'Auto-assigned as draw hand' },
+      { icon: <RulerIcon />, gesture: 'Release rotate', action: 'Snaps to nearest 45°' },
+      { icon: <SpiralIcon />, gesture: 'Release move', action: 'Slight inertia drift' },
     ],
   },
 ];
@@ -32,15 +98,15 @@ const gestures = [
 export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
   const displayedGestures = isWelcome
     ? [
-        {
-          section: 'Drawing Basics',
-          items: [
-            { emoji: '☝️', gesture: 'Index finger up', action: 'Draw lines in the air' },
-            { emoji: '🤏', gesture: 'Pinch (thumb + index)', action: 'Hold to erase lines' },
-            { emoji: '✊', gesture: 'Fist shape', action: 'Clear the entire canvas' },
-          ],
-        },
-      ]
+      {
+        section: 'Drawing Basics',
+        items: [
+          { icon: <IndexFingerIcon />, gesture: 'Index finger up', action: 'Draw lines in the air' },
+          { icon: <PinchIcon />, gesture: 'Pinch (thumb + index)', action: 'Hold to erase lines' },
+          { icon: <FistIcon />, gesture: 'Fist shape', action: 'Clear the entire canvas' },
+        ],
+      },
+    ]
     : gestures;
 
   return (
@@ -101,17 +167,17 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
             }}>
               {/* Header */}
               {isWelcome ? (
-                <div style={{ 
-                  display: 'flex', 
+                <div style={{
+                  display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'center', 
+                  alignItems: 'center',
                   marginBottom: '16px',
                   textAlign: 'center'
                 }}>
                   <Sparkles size={48} style={{ color: '#00ffff', marginBottom: '16px' }} />
-                  <span style={{ 
-                    fontSize: '28px', 
-                    fontWeight: 800, 
+                  <span style={{
+                    fontSize: '28px',
+                    fontWeight: 800,
                     letterSpacing: '0.05em',
                     color: '#fff',
                   }}>
@@ -122,11 +188,11 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
                   </p>
                 </div>
               ) : (
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  marginBottom: '20px' 
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '20px'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <HelpCircle size={20} style={{ color: '#00ffff' }} />
@@ -165,10 +231,10 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
                   boxSizing: 'border-box',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#00ffff', marginBottom: '8px', fontSize: '14px' }}>
-                    <span>📷</span> Camera Access & Privacy
+                    <CameraIcon /> Camera Access & Privacy
                   </div>
-                  We request camera access solely to interpret hand movements locally. 
-                  <strong> No images or video feeds are ever recorded, saved, or transmitted to any server.</strong> 
+                  We request camera access solely to interpret hand movements locally.
+                  <strong> No images or video feeds are ever recorded, saved, or transmitted to any server.</strong>
                   Your data stays entirely private and local to this tab.
                 </div>
               )}
@@ -207,7 +273,7 @@ export default function HelpPanel({ isOpen, onClose, isWelcome = false }) {
                             WebkitBackdropFilter: 'blur(16px)',
                           }}
                         >
-                          <span style={{ fontSize: '22px', width: '32px', textAlign: 'center' }}>{item.emoji}</span>
+                          <span style={{ width: '32px', display: 'flex', justifyContent: 'center' }}>{item.icon}</span>
                           <div style={{ flex: 1 }}>
                             <div style={{ fontSize: '13.5px', fontWeight: 600 }}>{item.gesture}</div>
                             <div style={{ fontSize: '11.5px', color: 'rgba(255,255,255,0.45)' }}>{item.action}</div>
