@@ -59,7 +59,7 @@ const CameraView = ({ onResults }) => {
       height: '100vh',
       overflow: 'hidden',
       zIndex: -1,
-      backgroundColor: '#000',
+      backgroundColor: '#030712',
     }}>
       <video
         ref={videoRef}
@@ -68,9 +68,11 @@ const CameraView = ({ onResults }) => {
           height: '100%',
           objectFit: 'cover',
           transform: 'scaleX(-1)', // Mirror effect
-          filter: 'brightness(1)', // Clear camera view
+          filter: 'brightness(0.28) contrast(1.1) saturate(0.55)', // Beautiful, muted, dark perspective
+          border: 'none',
         }}
         playsInline
+        muted
       />
     </div>
   );
